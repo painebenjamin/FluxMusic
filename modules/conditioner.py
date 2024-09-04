@@ -11,19 +11,33 @@ class HFEmbedder(nn.Module):
         self.output_key = "last_hidden_state" if self.is_t5 else "pooler_output"
 
         if version.startswith("openai"): 
-            local_path = '/maindata/data/shared/multimodal/public/ckpts/stable-diffusion-3-medium-diffusers/text_encoder' 
-            local_path_tokenizer = '/maindata/data/shared/multimodal/public/ckpts/stable-diffusion-3-medium-diffusers/tokenizer' 
-            self.tokenizer: CLIPTokenizer = CLIPTokenizer.from_pretrained(local_path_tokenizer, max_length=max_length)
-            self.hf_module: CLIPTextModel = CLIPTextModel.from_pretrained(local_path, **hf_kwargs).half()
+            repo_id = "stabilityai/stable-diffusion-3-medium-diffusers"
+            self.tokenizer: CLIPTokenizer = CLIPTokenizer.from_pretrained(
+                repo_id,
+                subfolder="tokenizer",
+                max_length=max_length
+            )
+            self.hf_module: CLIPTextModel = CLIPTextModel.from_pretrained(
+                repo_id,
+                subfolder="text_encoder",
+                **hf_kwargs
+            ).half()
         elif version.startswith("laion"): 
-            local_path = '/maindata/data/shared/multimodal/public/dataset_music/clap'
-            self.tokenizer = AutoTokenizer.from_pretrained(local_path, max_length=max_length)
-            self.hf_module: ClapTextModel = ClapTextModel.from_pretrained(local_path, **hf_kwargs).half()
-        else: 
-            local_path = '/maindata/data/shared/multimodal/public/ckpts/stable-diffusion-3-medium-diffusers/text_encoder_3' 
-            local_path_tokenizer = '/maindata/data/shared/multimodal/public/ckpts/stable-diffusion-3-medium-diffusers/tokenizer_3' 
-            self.tokenizer: T5Tokenizer = T5Tokenizer.from_pretrained(local_path_tokenizer, max_length=max_length)
-            self.hf_module: T5EncoderModel = T5EncoderModel.from_pretrained(local_path, **hf_kwargs).half()
+            repo_id = "laion/larger_clap_music"
+            self.tokenizer = AutoTokenizer.from_pretrained(repo_id, max_length=max_length)
+            self.hf_module: ClapTextModel = ClapTextModel.from_pretrained(repo_id, **hf_kwargs).half()
+        else:
+            repo_id = "stabilityai/stable-diffusion-3-medium-diffusers"
+            self.tokenizer: T5Tokenizer = T5Tokenizer.from_pretrained(
+                repo_id,
+                subfolder="tokenizer_3",
+                max_length=max_length
+            )
+            self.hf_module: T5EncoderModel = T5EncoderModel.from_pretrained(
+                repo_id,
+                subfolder="text_encoder_3",
+                **hf_kwargs
+            ).half()
 
         self.hf_module = self.hf_module.eval().requires_grad_(False)
 

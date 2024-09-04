@@ -23,7 +23,7 @@ class HFEmbedder(nn.Module):
                 **hf_kwargs
             ).half()
         elif version.startswith("laion"): 
-            repo_id = "laion/larger_clap_music"
+            repo_id = "laion/clap-htsat-unfused"
             self.tokenizer = AutoTokenizer.from_pretrained(repo_id, max_length=max_length)
             self.hf_module: ClapTextModel = ClapTextModel.from_pretrained(repo_id, **hf_kwargs).half()
         else:
